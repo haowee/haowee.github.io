@@ -1,0 +1,542 @@
+﻿ES:
+  alias:
+    Clinic: Out
+    Inhospital: In
+    Literature: LiteraturePDF
+  cluster:
+    name: structure
+  tcp:
+    port: 9300
+  type: KYJSCollection
+  url: 192.168.150.65
+
+server:
+  port: 7110
+spring:
+  profiles: search
+  application:
+    name: microservice-search
+  servlet:
+    multipart:
+      max-file-size: 100Mb
+      max-request-size: 100Mb
+  datasource:
+    url: jdbc:oracle:thin:@192.168.150.52:1521/pyemr
+    username: mrhp
+    password: mrhp_2018
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+    # 连接池建立时创建的初始化连接数
+    initialSize: 3
+    # 连接池中最小的活跃连接数
+    minIdle: 5
+    # 连接池中最大的活跃连接数
+    maxActive: 20
+    # 获取连接等待超时的时间
+    maxWait: 30000
+    # 间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+    timeBetweenEvictionRunsMillis: 60000
+    # 一个连接在池中最小生存的时间，单位是毫秒
+    minEvictableIdleTimeMillis: 300000
+    maxEvictableIdleTimeMillis: 900000
+    validationQuery: SELECT 1 FROM DUAL
+    # 是否在连接空闲一段时间后检测其可用性
+    testWhileIdle: true
+    # 是否在获得连接后检测其可用性
+    testOnBorrow: false
+    # 是否在连接放回连接池后检测其可用性
+    testOnReturn: false
+    # 打开PSCache，并且指定每个连接上PSCache的大小
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    # 监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+    filters: stat,log4j
+    # 合并多个DruidDataSource的监控数据
+    useGlobalDataSourceStat: true
+    # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000`
+    
+DicURL: http://192.168.150.64:9200/_cat/ansj
+
+#是否开启权限过滤  true：开启  false：关闭
+authority:
+  enable: false
+search:
+  aggPatient: false
+  debugMode: 1
+---
+
+#--------------------------- microservice-auth ----------------------------
+server:
+  port: 7500
+spring:
+  profiles: auth
+  application:
+    name: microservice-auth
+auth:
+  jdbc:
+    # 杭州for番禺192.168.150.52:1521/pyemr
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    user: mrhp
+    #password: mrhp_2018
+    password: mrhp
+    driver: oracle.jdbc.driver.OracleDriver
+
+---
+#--------------------------- microservice-dict ----------------------------
+server:
+  port: 7200
+spring:
+  profiles: dict
+  application:
+    name: microservice-dict
+  redis:
+    # Redis数据库索引（默认为0）
+    database: 0
+    # 杭州192.168.150.64 
+    # 番禺10.1.240.41
+    # 汕大附一 192.168.7.44  
+    #host: 192.168.7.44
+    host: 192.168.150.64
+    #host: 172.19.41.85
+    #host: 127.0.0.1
+    port: 6379
+    #password: unicorn
+    password: kypt-basy
+    # 数据库连接超时时间，2.0 中该参数的类型为Duration，这里在配置的时候需要指明单位
+    timeout: 10s
+    # 连接池配置，2.0中直接使用jedis或者lettuce配置连接池
+    jedis:
+      pool:
+        # 最大空闲连接数
+        max-idle: 50
+        # 最小空闲连接数
+        min-idle: 5
+        # 等待可用连接的最大时间，负数为不限制
+        max-wait:  -1s
+        # 最大活跃连接数，负数为不限制
+        max-active: -1
+dict:
+  jdbc:
+    # 杭州for番禺192.168.150.52:1521/pyemr
+    # 杭州for东莞192.168.150.52:1521/emrdg
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrjjnew
+    #url: jdbc:oracle:thin:@172.19.40.233/emrcqbak
+    #url: jdbc:oracle:thin:@172.19.21.71:1521/orcl
+    user: mrhp
+    password: Mrhp2020
+    #url: jdbc:oracle:thin:@172.16.37.18:1521/emr
+    #user: mrhp
+    #password: mrhp
+    driver: oracle.jdbc.driver.OracleDriver
+
+---
+#--------------------------- microservice-home ----------------------------
+server:
+  port: 7100
+  max-http-header-size: 1048576
+spring:
+  profiles: basy
+  application:
+    name: microservice-home
+basy:
+  jdbc:
+    # 杭州for番禺192.168.150.52:1521/pyemr
+    # 杭州for东莞192.168.150.52:1521/emrdg
+    # 汕大附一 192.168.150.52:1521/emrdemo
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrdg
+    #url: jdbc:oracle:thin:@172.16.37.18:1521/emr
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrjjnew
+    #url: jdbc:oracle:thin:@172.19.40.233/emrcqbak
+    #url: jdbc:oracle:thin:@172.19.21.71/orcl
+    user: mrhp
+    #password: mrhp_2018
+    password: Mrhp2020
+    driver: oracle.jdbc.driver.OracleDriver  
+    
+---
+#--------------------------- microservice-catalog ----------------------------
+server:
+  port: 7300
+  max-http-header-size: 1048576
+spring:
+  profiles: catalog
+  application:
+    name: microservice-catalog
+catalog:
+  jdbc:
+    driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    #汕大附一
+    password: Ewell@123
+    url: jdbc:sqlserver://192.168.7.34:1433;DatabaseName=bagl_java 
+    user: sa
+    #番禺
+    #password: ba_interface
+    #url: jdbc:sqlserver://10.1.241.49:1433;DatabaseName=bagl_java 
+    #user: ba_interface
+    
+ 
+---
+#--------------------------- microservice-report ----------------------------
+server:
+  port: 7400
+  max-http-header-size: 1048576
+spring:
+  profiles: report
+  application:
+    name: microservice-report
+basy:
+  jdbc:
+    # 杭州for番禺192.168.150.52:1521/pyemr
+    # 杭州for东莞192.168.150.52:1521/dgemr
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    user: mrhp
+    #password: mrhp_2018
+    driver: oracle.jdbc.driver.OracleDriver
+    
+    
+---
+#--------------------------- microservice-clinical-view-provider ----------------------------
+server:
+  port: 7510
+spring:
+  profiles: clinicalView
+  application:
+    name: microservice-clinical-view-provider
+clinicalView:
+  jdbc:
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    user: mrhp
+    password: mrhp_2018
+    driver: oracle.jdbc.driver.OracleDriver
+    
+
+---
+#--------------------------- microservice-dictionary-provider ----------------------------
+server:
+  port: 7120
+  max-http-header-size: 1048576
+spring:
+  profiles: dictionary
+  application:
+    name: microservice-dictionary-provider
+dictionary:
+  jdbc:
+    url: jdbc:oracle:thin:@192.168.150.52:1521/dgemr
+    user: cdict
+    password: 123456
+    driver: oracle.jdbc.driver.OracleDriver
+
+--- 
+#--------------------------- medical-record ----------------------------
+server:
+  port: 8210
+spring:
+  profiles: medical-record
+  application:
+    name: medical-record
+  datasource:
+    # druid数据源配置
+    druid:
+      username: medqc
+      password: Medqc123456
+      url: jdbc:oracle:thin:@192.168.150.15:1521/emrmaster
+      # username: medqc
+      # password: Medqc123456
+      # url: jdbc:oracle:thin:@172.168.4.167:1523/emrtaf
+      driverClassName: oracle.jdbc.driver.OracleDriver
+  redis:
+    # 杭州192.168.150.64 番禺10.1.240.41
+    # host: 192.168.150.64
+    # port: 6380
+    # password: #kypt-basy 
+    host: 192.168.150.64
+    port: 6379
+    password: kypt-basy 
+react:
+  medical-record:
+    url: 192.168.201.163:4840
+htmltopdf:
+  server: linux
+  #windows 工具生成pdf配置
+  windows-dest: D:\\
+  windows-tool: D:\\wkhtmltopdf\\bin\\wkhtmltopdf.exe
+  #linux调用外部服务生成pdf
+  #linux-url: http://192.168.201.163:8084/rest/pdf/show
+  #linux-dest: /opt/download/medicalrecord/
+catalog:
+  message:
+    open: true
+mrhpReturn:
+  message:
+    open: false
+forest:
+  timeout: 8000 # 请求超时时间，单位为毫秒（默认为 3000）
+  connect-timeout: 8000 # 连接超时时间，单位为毫秒（默认为 timeout）
+  read-timeout: 8000 # 数据读取超时时间，单位为毫秒（默认为 timeout）
+  variables:
+    message: 192.168.201.229:7778
+password:
+  default: 8 #默认初始密码 sha1
+  
+job:
+  archive:
+    cron: 0 0 1 * * ?  #每日凌晨一点运行自动归档
+    enabled: false
+#    cron: 0 0/1 * * * ?  #每隔一分钟运行
+#    enabled: false
+  recCollection:
+    #cron: 0 0 1 * * ?  #每日凌晨一点运行定时核心制度定时分析人物
+    cron: 0 25 11 * * ? #调试用，指定时间
+    enable: false #开关
+  AutoCollection:
+    #cron: 0 0 1 * * ?  #每日凌晨一点运行定时核心制度定时分析人物
+    cron: 0 17 11 * * ? #调试用，指定时间
+    enable: false #开关
+---
+#--------------------------- medical-record-data-sources ----------------------------
+server:
+  port: 8230
+spring:
+  profiles: medical-record-data-sources
+  application:
+    name: medical-record-data-sources
+  datasource:
+    # druid数据源配置
+    druid:
+      username: medqc
+      password: Medqc123456
+      url: jdbc:oracle:thin:@192.168.150.15:1521/emrmaster
+      # username: medqc
+      # password: Medqc123456
+      # url: jdbc:oracle:thin:@172.168.4.167:1523/emrtaf
+      driverClassName: oracle.jdbc.driver.OracleDriver
+  redis:
+    # 杭州192.168.150.64 番禺10.1.240.41
+    # host: 192.168.150.64
+    # port: 6380
+    # password: #kypt-basy 
+    host: localhost
+    port: 6379
+    password: #kypt-basy 
+
+---
+#--------------------------- microservice-medicalFee ----------------------------
+server:
+  port: 7800
+spring:
+  profiles: medicalFee
+  application:
+    name: microservice-medicalFee
+medicalFee:
+  jdbc:
+    # 杭州for番禺192.168.150.52:1521/pyemr
+    # 重庆测试 192.168.3.213:1521/orcl
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    user: mrhp
+    password: mrhp_2018
+    driver: oracle.jdbc.driver.OracleDriver
+    
+---
+#--------------------------- microservice-pathological-home ----------------------------
+server:
+  port: 7700
+  max-http-header-size: 1048576
+spring:
+  profiles: pathological
+  application:
+    name: microservice-pathological-home
+#  番禺测试 url: jdbc:oracle:thin:@10.1.240.114:1521/orcl
+#  番禺 url: jdbc:oracle:thin:@10.1.238.10:1521/emrs
+# 杭州番禺测试 url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+pathology:
+  jdbc:
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    user: mrhp
+    password: mrhp_2018
+    driver: oracle.jdbc.driver.OracleDriver
+
+---
+#--------------------------- microservice-adverse-events-provider ----------------------------
+server:
+  port: 7110
+spring:
+  profiles: events
+  application:
+    name: microservice-adverse-events-provider
+  datasource:
+    username: medqc
+    password: medqc
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    #url: jdbc:oracle:thin:@172.16.37.18:1521/emr  
+  redis:
+    # Redis数据库索引（默认为0）
+    database: 0
+    # 杭州192.168.150.64 番禺10.1.240.41
+    host: 192.168.150.64
+    port: 6379
+    password: kypt-basy
+    # 数据库连接超时时间，2.0 中该参数的类型为Duration，这里在配置的时候需要指明单位
+    timeout: 10s
+    # 连接池配置，2.0中直接使用jedis或者lettuce配置连接池
+    jedis:
+      pool:
+        # 最大空闲连接数
+        max-idle: 50
+        # 最小空闲连接数
+        min-idle: 5
+        # 等待可用连接的最大时间，负数为不限制
+        max-wait:  -1s
+        # 最大活跃连接数，负数为不限制
+        max-active: -1
+---
+#--------------------------- microservice-medrecord-provider ----------------------------
+server:
+  port: 7110
+spring:
+  profiles: medrecord-provider
+  application:
+    name: microservice-medrecord-provider
+  datasource:
+    username: medqc
+    password: medqc
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+  redis:
+    # Redis数据库索引（默认为0）
+    database: 0
+    # 杭州192.168.150.64 番禺10.1.240.41
+    host: 192.168.150.64
+    port: 6379
+    password: kypt-basy
+    # 数据库连接超时时间，2.0 中该参数的类型为Duration，这里在配置的时候需要指明单位
+    timeout: 10s
+    # 连接池配置，2.0中直接使用jedis或者lettuce配置连接池
+    jedis:
+      pool:
+        # 最大空闲连接数
+        max-idle: 50
+        # 最小空闲连接数
+        min-idle: 5
+        # 等待可用连接的最大时间，负数为不限制
+        max-wait:  -1s
+        # 最大活跃连接数，负数为不限制
+        max-active: -1
+---
+#--------------------------- microservice-quality-provider ----------------------------
+server:
+  port: 8092
+spring:
+  profiles: quality
+  application:
+    name: microservice-quality
+quality:
+  jdbc:
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    user: medqc
+    password: medqc
+    driver: oracle.jdbc.driver.OracleDriver
+---
+#--------------------------- microservice-medqc ----------------------------
+server:
+  port: 8090
+  max-http-header-size: 1048576
+spring:
+  application:
+    name: out-service-medqc
+  profiles:
+    active: medqc
+  datasource:
+    username: medqc
+    password: medqc
+    #url: jdbc:oracle:thin:@172.16.37.18:1521/emr
+    url: jdbc:oracle:thin:@192.168.150.15:1521/emrjj
+    #url: jdbc:oracle:thin:@172.19.40.233/emrcqbak
+    #url: jdbc:oracle:thin:@172.19.21.71/orcl
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+---
+#--------------------------- microservice-quality-indicator ----------------------------
+server:
+  port: 8120
+spring:
+  profiles: quality-indicator
+  application:
+    name: microservice-quality-indicator-provider
+quality:
+  jdbc:
+    # 杭州for番禺192.168.150.52:1521/pyemr
+    # 重庆测试 192.168.3.213:1521/orcl
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    user: medqc
+    password: medqc
+    driver: oracle.jdbc.driver.OracleDriver
+---
+#--------------------------- microservice-quality-ru ----------------------------
+server:
+  port: 8092
+spring:
+  profiles: quality-ru
+  application:
+    name: microservice-quality-ru-provider
+#quality:
+  #jdbc:
+    # 杭州for番禺192.168.150.52:1521/pyemr
+    # 重庆测试 192.168.3.213:1521/orcl
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    #password: medqc
+    #driver: oracle.jdbc.driver.OracleDriver
+  datasource:
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    #url: jdbc:oracle:thin:@172.19.40.233/emrcqbak
+    #url: jdbc:oracle:thin:@172.19.21.71:1521/orcl
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrjjnew
+    url: jdbc:oracle:thin:@192.168.150.15:1521/emrmaster
+    username: medqc
+    password: Medqc123456
+---
+#---------------------------------microservice-quality-rec------------------
+server:
+  port: 8140
+spring:
+  profiles: quality-rec
+  application:
+    name: microservice-quality-rec
+  datasource:
+    #url: jdbc:oracle:thin:@172.16.37.18:1521/emr
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrjjnew
+    #url: jdbc:oracle:thin:@172.19.40.233/emrcqbak
+    #url: jdbc:oracle:thin:@172.19.21.71/orcl
+    username: medqc
+    password: Medqc2020
+---  
+#--------------------------- microservice-quality-indicator-provider ----------------------------
+server:
+  port: 8120
+spring:
+  profiles: quality-indicator
+  application:
+    name: microservice-quality-indicator-provider
+  datasource:
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+    url: jdbc:oracle:thin:@192.168.150.15:1521/emrjj
+    username: medqc
+    password: medqc
+---
+#--------------------------- microservice-medqc ----------------------------
+server:
+  port: 8090
+  max-http-header-size: 1048576
+spring:
+  application:
+    name: out-service-medqc
+  profiles:
+    active: medqc
+  datasource:
+    username: medqc
+    password: Medqc2020
+    #url: jdbc:oracle:thin:@172.16.37.18:1521/emr
+    url: jdbc:oracle:thin:@192.168.150.52:1521/emrjjnew
+    #url: jdbc:oracle:thin:@172.19.40.233/emrcqbak
+    #url: jdbc:oracle:thin:@172.19.21.71/orcl
+    #url: jdbc:oracle:thin:@192.168.150.52:1521/emrdemo
+---
